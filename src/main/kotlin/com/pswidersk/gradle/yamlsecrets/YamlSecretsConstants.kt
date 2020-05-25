@@ -9,7 +9,7 @@ const val YAML_SECRETS_PLUGIN_EXTENSION_NAME = "secrets"
 /**
  * Extensions of files which will be found as secrets.
  */
-val SECRET_EXTENSIONS = listOf("sec.yml", "sec.yaml")
+val SECRET_EXTENSIONS = listOf(".sec.yml", ".sec.yaml")
 
 /**
  * Prefix of secrets file when hidden.

@@ -3,38 +3,46 @@ package com.pswidersk.gradle.yamlsecrets
 open class YamlSecretsResolver {
     val secretsByName: MutableMap<String, Map<String, *>> = mutableMapOf()
 
-    fun getStringValue(key: String): String {
+    fun getValue(key: String): Any {
         val secretsName = key.substringBefore(PROPS_SEP)
         val secretsMap = secretsByName.getValue(secretsName)
         val yamlPropertyKey = key.substringAfter(PROPS_SEP)
-        return getNestedStringValue(yamlPropertyKey, secretsName, secretsMap)
+        if (yamlPropertyKey == "" || !key.contains(PROPS_SEP))
+            return secretsMap
+        return getNestedValue(yamlPropertyKey, secretsName, secretsMap)
     }
 
-    private fun getNestedStringValue(fullKey: String, secretsName: String, secretsMap: Map<*, *>): String {
+    private fun getNestedValue(fullKey: String, secretsName: String, secretsMap: Map<*, *>): Any {
         val keys = fullKey.split(PROPS_SEP)
-        var value = secretsMap
+        var currentMap = secretsMap
         keys.forEachIndexed { index, key ->
-            if (isArrayIndex(key)) {
-                val arrayIndex = extractArrayIndex(key)
-                when (val array = value[keys[index - 1]]) {
-                    is List<*> -> {
-                        when (val arrayValue = array[arrayIndex]) {
-                            null -> throw IllegalStateException("Array value can not be null for key: $fullKey and secrets: $secretsName.")
-                            is Map<*, *> -> value = arrayValue
-                            is List<*> -> {
+            when {
+                isArrayIndex(key) -> {
+                    val arrayIndex = extractArrayIndex(key)
+                    when (val array = currentMap[keys[index - 1]]) {
+                        is List<*> -> {
+                            val arrayValue = array[arrayIndex]
+                            when {
+                                arrayValue == null -> throw IllegalStateException("Array value can not be null for key: $fullKey and secrets: $secretsName.")
+                                isLast(index, keys) -> return arrayValue
+                                arrayValue is Map<*, *> -> currentMap = arrayValue
                             }
-                            else -> if (index == keys.lastIndex) return arrayValue.toString()
                         }
+                        else -> throw IllegalStateException("Expecting array in key: $fullKey and secrets: $secretsName.")
                     }
-                    else -> throw IllegalStateException("Expecting array in key: $fullKey and secrets: $secretsName.")
                 }
-            } else {
-                when (val mapValue = value[key]) {
-                    null -> throw IllegalStateException("Key: $fullKey does not exists in secrets: $secretsName.")
-                    is Map<*, *> -> value = mapValue
-                    is List<*> -> {
+                isLast(index, keys) -> {
+                    val value = currentMap[key]
+                    if (value == null)
+                        throw IllegalStateException("Key: $fullKey does not exists in secrets: $secretsName.")
+                    else
+                        return value
+                }
+                else -> {
+                    when (val mapValue = currentMap[key]) {
+                        null -> throw IllegalStateException("Key: $fullKey does not exists in secrets: $secretsName.")
+                        is Map<*, *> -> currentMap = mapValue
                     }
-                    else -> return mapValue.toString()
                 }
             }
         }
@@ -43,6 +51,10 @@ open class YamlSecretsResolver {
 
     private fun isArrayIndex(key: String): Boolean {
         return key.startsWith(ARRAY_START) && key.endsWith(ARRAY_END)
+    }
+
+    private fun isLast(index: Int, keys: List<String>): Boolean {
+        return index == keys.lastIndex
     }
 
     private fun extractArrayIndex(listIndex: String): Int {
@@ -56,7 +68,6 @@ open class YamlSecretsResolver {
 
     fun addSecrets(secretsFileName: String, secrets: Map<String, *>) {
         this.secretsByName[secretsFileName] = secrets
-
     }
 
 }
