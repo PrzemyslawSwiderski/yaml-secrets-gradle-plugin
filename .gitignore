@@ -3,5 +3,5 @@
 .idea
 
 ### Yaml Secrets files ###
-examples/sample-project/.testSecrets.yml
-examples/sample-project/.testSecrets2.yml
+.*.sec.yml
+.*.sec.yaml

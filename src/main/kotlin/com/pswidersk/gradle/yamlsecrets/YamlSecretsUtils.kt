@@ -15,7 +15,7 @@ internal inline fun <reified T : Any> ObjectFactory.property(): Property<T> =
         property(T::class.javaObjectType)
 
 /**
- * Gets the [YamlSecretsExtension] that is installed on the project.
+ * Gets the [YamlSecretsResolver] that is installed on the project.
  */
-internal val Project.yamlSecrets: YamlSecretsExtension
-    get() = extensions.getByType(YamlSecretsExtension::class.java)
+internal val Project.secrets: YamlSecretsResolver
+    get() = extensions.getByType(YamlSecretsResolver::class.java)
