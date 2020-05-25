@@ -13,7 +13,7 @@ Those properties can then be used in build scripts.
 secretProp: <TO_BE_FILLED>
 # property with default value
 testProp2: 7
-envVars: # fill args
+envVars: # fill envVars
 args: # fill args list
 ```
 3. Refresh project to create `.testSecrets.sec.yml` file.
@@ -54,7 +54,7 @@ args: # fill args list
     (...)
     ```
 
-Check `examples` directory to find sample projects.
+Check out `examples` directory to find sample projects.
 
 ## Notes
 * plugin automatically adds secret files pattern to `.gitignore` if exists in root dir.
