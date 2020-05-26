@@ -1,0 +1,9 @@
+testProp1: "test"
+testProp2: 3
+testProp3:
+  nested1: 2
+  nested2: test
+  nested3:
+    - 2
+    - 3
+    - 2

@@ -1,0 +1,8 @@
+plugins {
+    id "com.pswidersk.yaml-secrets-plugin" version "1.0.1"
+}
+
+Long testProp2 = secrets.getValue("test.testProp2")
+Map testMap = secrets.getValue("test")
+Map nestedProp = testMap.get("testProp3")
+Integer nestedInt = nestedProp.get("nested1")

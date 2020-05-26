@@ -32,23 +32,23 @@ args: # fill args list
 5. Get properties in build script by query string:
     ```kotlin
     (...)
-    val secretProp = secrets.getValue("testSecrets.secretProp")
+    val secretProp = secrets.get<String>("testSecrets.secretProp")
     println(secretProp)
     // produces: "secretValue"
     
-    val queriedValue = secrets.getValue("testSecrets.testProp2")
+    val queriedValue = secrets.get<Int>("testSecrets.testProp2")
     println(queriedValue)
     // produces: "7"
     
-    val queriedMap = secrets.getValue("testSecrets.envVars")
+    val queriedMap = secrets.get<Map<String,*>>("testSecrets.envVars")
     println(queriedMap)
     // produces: "{ENV_VAR_1=testEnvVar, ENV_VAR_2=200}"
     
-    val queriedList = secrets.getValue("testSecrets.args")
+    val queriedList = secrets.get<List<String>>("testSecrets.args")
     println(queriedList)
     // produces: "[1, 2, 3]"
     
-    val queriedListElement = secrets.getValue("testSecrets.args[2]")
+    val queriedListElement = secrets.get<Int>("testSecrets.args[2]")
     println(queriedListElement)
     // produces: "3"
     (...)

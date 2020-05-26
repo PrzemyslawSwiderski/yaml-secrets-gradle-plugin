@@ -1,7 +1,7 @@
 import com.pswidersk.gradle.python.VenvTask
 
 plugins {
-    id("com.pswidersk.yaml-secrets-plugin") version "1.0.0"
+    id("com.pswidersk.yaml-secrets-plugin") version "1.0.1"
     id("com.pswidersk.python-plugin") version "1.1.2"
 }
 
@@ -15,8 +15,8 @@ tasks {
         workingDir(projectDir.resolve("main"))
         args(listOf("main.py"))
         doFirst {
-            val args = secrets.getValue("pythonSecrets.mainArgs")
-            val envVars = secrets.getValue("pythonSecrets.envVars") as Map<String, *>
+            val args = secrets.get<List<String>>("pythonSecrets.mainArgs")
+            val envVars = secrets.get<Map<String, *>>("pythonSecrets.envVars")
             args(args)
             environment(envVars)
         }

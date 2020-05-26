@@ -1,7 +1,15 @@
 package com.pswidersk.gradle.yamlsecrets
 
 open class YamlSecretsResolver {
-    val secretsByName: MutableMap<String, Map<String, *>> = mutableMapOf()
+    private val secretsByName: MutableMap<String, Map<String, *>> = mutableMapOf()
+
+    inline fun <reified T> get(key: String): T {
+        val secretValue = getValue(key)
+        if (secretValue is T)
+            return getValue(key) as T
+        else
+            throw IllegalStateException("Illegal generic type: ${T::class.java.simpleName}, secret value is type of: ${secretValue.javaClass.simpleName}")
+    }
 
     fun getValue(key: String): Any {
         val secretsName = key.substringBefore(PROPS_SEP)
