@@ -95,7 +95,7 @@ internal class YamlSecretsResolverTest {
         val yamlSecretsResolver = initSecretsResolver()
 
         // then
-        val testProp2 by (yamlSecretsResolver.getValue("testSecrets.") as Map<String, *>)
+        val testProp2 by yamlSecretsResolver.get<Map<String, Any>>("testSecrets.")
         assertEquals(3, testProp2)
     }
 
