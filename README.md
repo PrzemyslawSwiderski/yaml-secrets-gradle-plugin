@@ -1,9 +1,9 @@
 # Gradle Yaml Secrets Plugin
-This plugin can load properties from Yaml secret files.
-Those properties can then be used in build scripts.
+This plugin loads properties from Yaml secret files.
+Properties can later be used in build scripts.
 
 ## Requirements
-* JRE supported by gradle 6.4 version (JRE 8 or higher)
+* JRE 8 or higher
 
 ## How to use
 1. Apply a plugin to a project as described on [gradle portal](https://plugins.gradle.org/plugin/com.pswidersk.yaml-secrets-plugin).
@@ -57,5 +57,5 @@ args: # fill args list
 Check out `examples` directory to find sample projects.
 
 ## Notes
-* plugin automatically adds secret files pattern to `.gitignore` if exists in root dir.
+* plugin automatically adds secret files pattern to `.gitignore` if this file exists in root dir.
 * secret files with the same name can be overridden in child projects (overriding single Yaml properties is not supported) 
