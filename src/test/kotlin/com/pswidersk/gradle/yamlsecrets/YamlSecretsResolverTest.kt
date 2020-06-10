@@ -8,20 +8,17 @@ import org.junit.jupiter.api.assertThrows
 
 internal class YamlSecretsResolverTest {
 
+    //given
+    private val yamlSecretsResolver = initSecretsResolver()
+
     @Test
     fun `test if secrets were added to resolver`() {
-        // given
-        val yamlSecretsResolver = initSecretsResolver()
-
         // then
         assertEquals("test", yamlSecretsResolver.getValue("testSecrets.testProp1"))
     }
 
     @Test
     fun `test if nested string props are resolved properly`() {
-        // given
-        val yamlSecretsResolver = initSecretsResolver()
-
         // then
         assertEquals("2", yamlSecretsResolver.getValue("testSecrets.testProp3.nested1").toString())
         assertEquals("test", yamlSecretsResolver.getValue("testSecrets.testProp3.nested2"))
@@ -29,9 +26,6 @@ internal class YamlSecretsResolverTest {
 
     @Test
     fun `test if nested string prop inside list is resolved properly`() {
-        // given
-        val yamlSecretsResolver = initSecretsResolver()
-
         // then
         assertEquals("testPropInList", yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[2]"))
         assertEquals("testKey", yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0].key"))
@@ -40,9 +34,6 @@ internal class YamlSecretsResolverTest {
 
     @Test
     fun `test if exception is thrown for illegalIndex`() {
-        // given
-        val yamlSecretsResolver = initSecretsResolver()
-
         // then
         assertThrows<IllegalStateException> { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[1].key") }
         assertThrows<IndexOutOfBoundsException> { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[4]") }
@@ -50,18 +41,12 @@ internal class YamlSecretsResolverTest {
 
     @Test
     fun `test if exception is thrown for non-existing secret file`() {
-        // given
-        val yamlSecretsResolver = initSecretsResolver()
-
         // then
         assertThrows<NoSuchElementException> { yamlSecretsResolver.getValue("testNonExistingSecrets.nonExisting") }
     }
 
     @Test
     fun `test if exception is thrown for non-existing key`() {
-        // given
-        val yamlSecretsResolver = initSecretsResolver()
-
         // then
         val exception = assertThrows<IllegalStateException> { yamlSecretsResolver.getValue("testSecrets.nonExisting") }
         assertEquals("Key: nonExisting does not exists in secrets: testSecrets.", exception.message)
@@ -73,8 +58,6 @@ internal class YamlSecretsResolverTest {
         val expectedMap = mapOf("key" to "testKey",
                 "value" to "testValue",
                 "alsoNestedList" to listOf("testValueInNestedList", "testValue2InNestedList"))
-        val yamlSecretsResolver = initSecretsResolver()
-
         // then
         assertEquals(expectedMap, yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0]"))
     }
@@ -83,28 +66,34 @@ internal class YamlSecretsResolverTest {
     fun `test if expected list is returned`() {
         // given
         val expectedList = listOf("testValueInNestedList", "testValue2InNestedList")
-        val yamlSecretsResolver = initSecretsResolver()
-
         // then
         assertEquals(expectedList, yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0].alsoNestedList"))
     }
 
     @Test
     fun `test accessing by delegate`() {
-        // given
-        val yamlSecretsResolver = initSecretsResolver()
-
         // then
         val testProp2 by yamlSecretsResolver.get<Map<String, Any>>("testSecrets.")
         assertEquals(3, testProp2)
     }
 
+    @Test
+    fun `test getting secrets names`() {
+        // given
+        val expectedList = setOf("testSecrets", "testSecrets2")
+        // then
+        assertEquals(expectedList, yamlSecretsResolver.getNames())
+    }
+
     private fun initSecretsResolver(): YamlSecretsResolver {
         val mapper = YAMLMapper()
         val testSecretsFileContent = getResourceContent("testSecrets.sec.yml")
+        val testSecretsFileContent2 = getResourceContent("testSecrets2.sec.yml")
         val secrets = mapper.readValue<Map<String, *>>(testSecretsFileContent)
+        val secrets2 = mapper.readValue<Map<String, *>>(testSecretsFileContent2)
         val yamlSecretsResolver = YamlSecretsResolver()
         yamlSecretsResolver.addSecrets("testSecrets", secrets)
+        yamlSecretsResolver.addSecrets("testSecrets2", secrets2)
         return yamlSecretsResolver
     }
 

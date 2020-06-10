@@ -20,6 +20,10 @@ open class YamlSecretsResolver {
         return getNestedValue(yamlPropertyKey, secretsName, secretsMap)
     }
 
+    fun getNames(): Set<String> {
+        return secretsByName.keys
+    }
+
     private fun getNestedValue(fullKey: String, secretsName: String, secretsMap: Map<*, *>): Any {
         val keys = fullKey.split(PROPS_SEP)
         var currentMap = secretsMap
