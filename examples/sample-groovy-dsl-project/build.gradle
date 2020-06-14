@@ -3,6 +3,6 @@ plugins {
 }
 
 Long testProp2 = secrets.getValue("test.testProp2")
+assert testProp2 == 3
 Map testMap = secrets.getValue("test")
-Map nestedProp = testMap.get("testProp3")
-Integer nestedInt = nestedProp.get("nested1")
+assert testMap == [testProp1: "test", testProp2: 3, testProp3: [nested1: 2, nested2: "test", nested3: [2, 3, 2]]]
