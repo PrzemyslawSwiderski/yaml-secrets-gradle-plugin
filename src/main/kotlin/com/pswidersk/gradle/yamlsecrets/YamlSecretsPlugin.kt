@@ -1,7 +1,5 @@
 package com.pswidersk.gradle.yamlsecrets
 
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.io.File
@@ -12,16 +10,14 @@ class YamlSecretsPlugin : Plugin<Project> {
         project.extensions.create(YAML_SECRETS_PLUGIN_EXTENSION_NAME, YamlSecretsResolver::class.java)
         findSecretTemplateFiles(project).forEach { templateFile ->
             val secretFile = getProperSecretFile(templateFile)
-            loadProperties(project, secretFile)
+            loadProperties(project.secrets, secretFile)
         }
         addSecretFilesToGitIgnore(project)
     }
 
     private fun findSecretTemplateFiles(project: Project): Sequence<File> {
         return generateSequence(project) { it.parent }.sorted().flatMap { p ->
-            p.projectDir.walk().maxDepth(1)
-                    .filter { !it.nameWithoutExtension.startsWith(HIDDEN_PREFIX) }
-                    .filter { file -> SECRET_EXTENSIONS.any { file.name.endsWith(it) } }
+            getSecretTemplatesInDir(p.projectDir)
         }
     }
 
@@ -31,14 +27,6 @@ class YamlSecretsPlugin : Plugin<Project> {
             secretFile
         else
             secretTemplateFile.copyTo(secretFile)
-    }
-
-    private fun loadProperties(project: Project, targetFile: File) {
-        val mapper = YAMLMapper()
-        val secrets = mapper.readValue<Map<String, *>>(targetFile)
-        // strip '.sec.yml' / '.sec.yaml' extensions and remove '.' prefix from file name
-        val targetFileNameStripped = targetFile.name.trimStart(HIDDEN_PREFIX).substringBefore(PROPS_SEP)
-        project.secrets.addSecrets(targetFileNameStripped, secrets)
     }
 
     private fun addSecretFilesToGitIgnore(target: Project) {

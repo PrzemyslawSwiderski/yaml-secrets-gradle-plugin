@@ -3,29 +3,45 @@ package com.pswidersk.gradle.yamlsecrets
 open class YamlSecretsResolver {
     private val secretsByName: MutableMap<String, Map<String, *>> = mutableMapOf()
 
-    inline fun <reified T> get(key: String): T {
-        val secretValue = getValue(key)
+    inline fun <reified T> get(fullKey: String): T {
+        val secretValue = getValue(fullKey)
         if (secretValue is T)
-            return getValue(key) as T
+            return getValue(fullKey) as T
         else
-            throw IllegalStateException("Illegal generic type: ${T::class.java.simpleName}, secret value is type of: ${secretValue.javaClass.simpleName}")
+            throw IllegalStateException("Illegal generic type: ${T::class.java.simpleName}," +
+                    " secret value is type of: ${secretValue.javaClass.simpleName} for key: $fullKey")
     }
 
-    fun getValue(key: String): Any {
-        val secretsName = key.substringBefore(PROPS_SEP)
+    inline fun <reified T> get(secretsName: String, yamlPropertyKey: String): T {
+        val secretValue = getValue(secretsName, yamlPropertyKey)
+        if (secretValue is T)
+            return getValue(secretsName, yamlPropertyKey) as T
+        else
+            throw IllegalStateException("Illegal generic type: ${T::class.java.simpleName}," +
+                    " secret value is type of: ${secretValue.javaClass.simpleName} for secret: $secretsName and key: $yamlPropertyKey")
+    }
+
+    fun getValue(fullKey: String): Any {
+        return getValue(fullKey.substringBefore(PROPS_SEP), fullKey.substringAfter(PROPS_SEP, ""))
+    }
+
+    fun getValue(secretsName: String, yamlPropertyKey: String): Any {
         val secretsMap = secretsByName.getValue(secretsName)
-        val yamlPropertyKey = key.substringAfter(PROPS_SEP)
-        if (yamlPropertyKey == "" || !key.contains(PROPS_SEP))
+        if (yamlPropertyKey == "")
             return secretsMap
         return getNestedValue(yamlPropertyKey, secretsName, secretsMap)
+    }
+
+    fun getSecrets(secretsName: String): Map<String, Any> {
+        return get(secretsName, "")
     }
 
     fun getNames(): Set<String> {
         return secretsByName.keys
     }
 
-    private fun getNestedValue(fullKey: String, secretsName: String, secretsMap: Map<*, *>): Any {
-        val keys = fullKey.split(PROPS_SEP)
+    private fun getNestedValue(yamlPropertyKey: String, secretsName: String, secretsMap: Map<*, *>): Any {
+        val keys = yamlPropertyKey.split(PROPS_SEP)
         var currentMap = secretsMap
         keys.forEachIndexed { index, key ->
             when {
@@ -35,30 +51,30 @@ open class YamlSecretsResolver {
                         is List<*> -> {
                             val arrayValue = array[arrayIndex]
                             when {
-                                arrayValue == null -> throw IllegalStateException("Array value can not be null for key: $fullKey and secrets: $secretsName.")
+                                arrayValue == null -> throw IllegalStateException("Array value can not be null for key: $key and secrets: $secretsName.")
                                 isLast(index, keys) -> return arrayValue
                                 arrayValue is Map<*, *> -> currentMap = arrayValue
                             }
                         }
-                        else -> throw IllegalStateException("Expecting array in key: $fullKey and secrets: $secretsName.")
+                        else -> throw IllegalStateException("Expecting array in key: $key and secrets: $secretsName.")
                     }
                 }
                 isLast(index, keys) -> {
                     val value = currentMap[key]
                     if (value == null)
-                        throw IllegalStateException("Key: $fullKey does not exists in secrets: $secretsName.")
+                        throw IllegalStateException("Key: $key does not exists in secrets: $secretsName.")
                     else
                         return value
                 }
                 else -> {
                     when (val mapValue = currentMap[key]) {
-                        null -> throw IllegalStateException("Key: $fullKey does not exists in secrets: $secretsName.")
+                        null -> throw IllegalStateException("Key: $key does not exists in secrets: $secretsName.")
                         is Map<*, *> -> currentMap = mapValue
                     }
                 }
             }
         }
-        throw IllegalStateException("Key: $fullKey is illegal in secrets: $secretsName.")
+        throw IllegalStateException("Key: $yamlPropertyKey is illegal in secrets: $secretsName.")
     }
 
     private fun isArrayIndex(key: String): Boolean {

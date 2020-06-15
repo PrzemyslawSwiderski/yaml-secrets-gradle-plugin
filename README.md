@@ -36,6 +36,11 @@ args: # fill args list
     println(secretProp)
     // produces: "secretValue"
     
+    // the same can be done by passing secret name as a separate parameter:
+    val secretProp = secrets.get<String>("testSecrets", "secretProp")
+    println(secretProp)
+    // produces: "secretValue"
+    
     val queriedValue = secrets.get<Int>("testSecrets.testProp2")
     println(queriedValue)
     // produces: "7"

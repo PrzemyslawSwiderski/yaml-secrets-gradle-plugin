@@ -1,15 +1,14 @@
 package com.pswidersk.gradle.yamlsecrets
 
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.io.File
 
 internal class YamlSecretsResolverTest {
 
     //given
-    private val yamlSecretsResolver = initSecretsResolver()
+    private val yamlSecretsResolver = initSecretsResolver("secrets")
 
     @Test
     fun `test if secrets were added to resolver`() {
@@ -18,10 +17,30 @@ internal class YamlSecretsResolverTest {
     }
 
     @Test
-    fun `test if nested string props are resolved properly`() {
+    fun `test if nested string props are resolved properly 1`() {
         // then
         assertEquals("2", yamlSecretsResolver.getValue("testSecrets.testProp3.nested1").toString())
         assertEquals("test", yamlSecretsResolver.getValue("testSecrets.testProp3.nested2"))
+    }
+
+    @Test
+    fun `test if nested string props are resolved properly 2`() {
+        // then
+        assertEquals(2, yamlSecretsResolver.get("testSecrets.testProp3.nested1"))
+        assertEquals("test", yamlSecretsResolver.get<String>("testSecrets.testProp3.nested2"))
+    }
+
+    @Test
+    fun `test if nested string props are resolved properly 3`() {
+        // then
+        assertEquals(2, yamlSecretsResolver.get("testSecrets", "testProp3.nested1"))
+        assertEquals("test", yamlSecretsResolver.get<String>("testSecrets", "testProp3.nested2"))
+    }
+
+    @Test
+    fun `test if empty prop is resolved properly `() {
+        // then
+        assertEquals("", yamlSecretsResolver.getValue("testSecrets.testEmptyProp"))
     }
 
     @Test
@@ -33,10 +52,17 @@ internal class YamlSecretsResolverTest {
     }
 
     @Test
-    fun `test if exception is thrown for illegalIndex`() {
+    fun `test if exception is thrown for illegalIndex 1`() {
         // then
         assertThrows<IllegalStateException> { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[1].key") }
         assertThrows<IndexOutOfBoundsException> { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[4]") }
+    }
+
+    @Test
+    fun `test if exception is thrown for illegalIndex 2`() {
+        // then
+        assertThrows<IllegalStateException> { yamlSecretsResolver.getValue("testSecrets", "testProp3.nestedList.[1].key") }
+        assertThrows<IndexOutOfBoundsException> { yamlSecretsResolver.getValue("testSecrets", "testProp3.nestedList.[4]") }
     }
 
     @Test
@@ -71,9 +97,23 @@ internal class YamlSecretsResolverTest {
     }
 
     @Test
-    fun `test accessing by delegate`() {
+    fun `test accessing by delegate 1`() {
         // then
         val testProp2 by yamlSecretsResolver.get<Map<String, Any>>("testSecrets.")
+        assertEquals(3, testProp2)
+    }
+
+    @Test
+    fun `test accessing by delegate 2`() {
+        // then
+        val testProp2 by yamlSecretsResolver.get<Map<String, Any>>("testSecrets")
+        assertEquals(3, testProp2)
+    }
+
+    @Test
+    fun `test accessing by delegate 3`() {
+        // then
+        val testProp2 by yamlSecretsResolver.getSecrets("testSecrets")
         assertEquals(3, testProp2)
     }
 
@@ -85,19 +125,18 @@ internal class YamlSecretsResolverTest {
         assertEquals(expectedList, yamlSecretsResolver.getNames())
     }
 
-    private fun initSecretsResolver(): YamlSecretsResolver {
-        val mapper = YAMLMapper()
-        val testSecretsFileContent = getResourceContent("testSecrets.sec.yml")
-        val testSecretsFileContent2 = getResourceContent("testSecrets2.sec.yml")
-        val secrets = mapper.readValue<Map<String, *>>(testSecretsFileContent)
-        val secrets2 = mapper.readValue<Map<String, *>>(testSecretsFileContent2)
+    @Test
+    fun `test resolving empty secret file`() {
+        // then
+        assertThrows<IllegalStateException> { initSecretsResolver("emptySecrets") }
+    }
+
+    private fun initSecretsResolver(resourceName: String): YamlSecretsResolver {
         val yamlSecretsResolver = YamlSecretsResolver()
-        yamlSecretsResolver.addSecrets("testSecrets", secrets)
-        yamlSecretsResolver.addSecrets("testSecrets2", secrets2)
+        getSecretTemplatesInDir(File(javaClass.classLoader.getResource(resourceName)!!.path)).forEach {
+            loadProperties(yamlSecretsResolver, it)
+        }
         return yamlSecretsResolver
     }
 
-    private fun getResourceContent(resourceName: String): String {
-        return javaClass.classLoader.getResource(resourceName)!!.readText()
-    }
 }
