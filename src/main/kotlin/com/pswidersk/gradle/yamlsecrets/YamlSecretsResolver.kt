@@ -27,7 +27,7 @@ open class YamlSecretsResolver {
     }
 
     fun getSecretsData(secretsName: String): YamlSecretsData {
-        check(secretsDataByName.contains(secretsName)) { "Secrets with name: $secretsName can not be found" }
+        check(secretsDataByName.contains(secretsName)) { "Secrets with name: \"$secretsName\" could not be found." }
         return secretsDataByName.getValue(secretsName)
     }
 
