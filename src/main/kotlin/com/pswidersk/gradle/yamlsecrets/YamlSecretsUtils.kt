@@ -67,5 +67,5 @@ internal fun parseYamlProperties(targetFile: File): Map<String, *> = try {
     val mapper = YAMLMapper()
     mapper.readValue(targetFile)
 } catch (exception: Exception) {
-    throw IllegalStateException("Exception occurred during parsing YAML file: $targetFile", exception)
+    throw IllegalStateException("Exception occurred during parsing YAML file (file can not be empty): $targetFile", exception)
 }
