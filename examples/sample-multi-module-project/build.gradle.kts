@@ -14,6 +14,5 @@ val expectedSecretsData = YamlSecretsData(
         file(".test2.sec.yml"),
         mapOf("testProp1" to "test2PropInNestedProject")
 )
-println(expectedSecretsData)
 val secretsData = secrets.getSecretsData("test2")
 check(secretsData == expectedSecretsData)
