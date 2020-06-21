@@ -138,6 +138,12 @@ internal class YamlSecretsResolverTest {
     }
 
     @Test
+    fun `test getting missing secrets data`() {
+        // then
+        assertThrows<IllegalStateException> { yamlSecretsResolver.getSecretsData("nonExistingSecrets") }
+    }
+
+    @Test
     fun `test resolving empty secret file`() {
         // then
         assertThrows<IllegalStateException> { initSecretsResolver("emptySecrets") }

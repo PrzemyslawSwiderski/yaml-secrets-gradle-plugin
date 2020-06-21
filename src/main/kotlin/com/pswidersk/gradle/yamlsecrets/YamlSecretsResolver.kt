@@ -5,20 +5,14 @@ open class YamlSecretsResolver {
 
     inline fun <reified T> get(fullKey: String): T {
         val secretValue = getValue(fullKey)
-        if (secretValue is T)
-            return getValue(fullKey) as T
-        else
-            throw IllegalStateException("Illegal generic type: ${T::class.java.simpleName}," +
-                    " secret value is type of: ${secretValue.javaClass.simpleName} for key: $fullKey")
+        check(secretValue is T) { "Illegal generic type: ${T::class.java.simpleName}, secret value is type of: ${secretValue.javaClass.simpleName} for key: $fullKey" }
+        return getValue(fullKey) as T
     }
 
     inline fun <reified T> get(secretsName: String, yamlPropertyKey: String): T {
         val secretValue = getValue(secretsName, yamlPropertyKey)
-        if (secretValue is T)
-            return getValue(secretsName, yamlPropertyKey) as T
-        else
-            throw IllegalStateException("Illegal generic type: ${T::class.java.simpleName}," +
-                    " secret value is type of: ${secretValue.javaClass.simpleName} for secret: $secretsName and key: $yamlPropertyKey")
+        check(secretValue is T) { "Illegal generic type: ${T::class.java.simpleName}, secret value is type of: ${secretValue.javaClass.simpleName} for secret: $secretsName and key: $yamlPropertyKey" }
+        return getValue(secretsName, yamlPropertyKey) as T
     }
 
     fun getValue(fullKey: String): Any {
@@ -33,6 +27,7 @@ open class YamlSecretsResolver {
     }
 
     fun getSecretsData(secretsName: String): YamlSecretsData {
+        check(secretsDataByName.contains(secretsName)) { "Secrets with name: $secretsName can not be found" }
         return secretsDataByName.getValue(secretsName)
     }
 
