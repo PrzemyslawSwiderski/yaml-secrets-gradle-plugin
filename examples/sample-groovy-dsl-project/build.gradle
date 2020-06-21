@@ -1,5 +1,5 @@
 plugins {
-    id "com.pswidersk.yaml-secrets-plugin" version "1.0.7"
+    id "com.pswidersk.yaml-secrets-plugin" version "1.0.6"
 }
 
 Long testProp2 = secrets.getValue("test.testProp2")
