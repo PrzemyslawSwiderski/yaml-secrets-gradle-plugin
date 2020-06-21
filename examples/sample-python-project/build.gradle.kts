@@ -1,7 +1,7 @@
 import com.pswidersk.gradle.python.VenvTask
 
 plugins {
-    id("com.pswidersk.yaml-secrets-plugin") version "1.0.6"
+    id("com.pswidersk.yaml-secrets-plugin") version "1.0.7"
     id("com.pswidersk.python-plugin") version "1.1.2"
 }
 
