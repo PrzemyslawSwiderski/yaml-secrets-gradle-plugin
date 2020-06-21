@@ -1,7 +1,7 @@
 package com.pswidersk.gradle.yamlsecrets
 
 open class YamlSecretsResolver {
-    private val secretsByName: MutableMap<String, Map<String, *>> = mutableMapOf()
+    private val secretsDataByName: MutableMap<String, YamlSecretsData> = mutableMapOf()
 
     inline fun <reified T> get(fullKey: String): T {
         val secretValue = getValue(fullKey)
@@ -26,18 +26,18 @@ open class YamlSecretsResolver {
     }
 
     fun getValue(secretsName: String, yamlPropertyKey: String): Any {
-        val secretsMap = secretsByName.getValue(secretsName)
+        val secrets = secretsDataByName.getValue(secretsName)
         if (yamlPropertyKey == "")
-            return secretsMap
-        return getNestedValue(yamlPropertyKey, secretsName, secretsMap)
+            return secrets.properties
+        return getNestedValue(yamlPropertyKey, secretsName, secrets.properties)
     }
 
-    fun getSecrets(secretsName: String): Map<String, Any> {
-        return get(secretsName, "")
+    fun getSecretsData(secretsName: String): YamlSecretsData {
+        return secretsDataByName.getValue(secretsName)
     }
 
     fun getNames(): Set<String> {
-        return secretsByName.keys
+        return secretsDataByName.keys
     }
 
     private fun getNestedValue(yamlPropertyKey: String, secretsName: String, secretsMap: Map<*, *>): Any {
@@ -94,8 +94,8 @@ open class YamlSecretsResolver {
         }
     }
 
-    fun addSecrets(secretsFileName: String, secrets: Map<String, *>) {
-        this.secretsByName[secretsFileName] = secrets
+    fun addSecrets(secretsFileName: String, yamlSecretsData: YamlSecretsData) {
+        this.secretsDataByName[secretsFileName] = yamlSecretsData
     }
 
 }

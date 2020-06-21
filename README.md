@@ -29,7 +29,7 @@ args: # fill args list
         - 2
         - 3
     ```
-5. Get properties in build script by query string:
+5. Query loaded properties by the following ways:
     ```kotlin
     (...)
     val secretProp = secrets.get<String>("testSecrets.secretProp")
@@ -56,6 +56,11 @@ args: # fill args list
     val queriedListElement = secrets.get<Int>("testSecrets.args[2]")
     println(queriedListElement)
     // produces: "3"
+   
+    val secretsData = secrets.getSecretsData("testSecrets")
+    println(secretsData)
+    // produces: "YamlSecretsData(secretsName=testSecrets, templateFile=<sample_path>\testSecrets.sec.yml, propertiesFile=<samplePath>\.testSecrets.sec.yml, properties={secretProp=secretValue (...)})"
+
     (...)
     ```
 

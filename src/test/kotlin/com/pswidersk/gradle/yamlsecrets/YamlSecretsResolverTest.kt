@@ -113,7 +113,7 @@ internal class YamlSecretsResolverTest {
     @Test
     fun `test accessing by delegate 3`() {
         // then
-        val testProp2 by yamlSecretsResolver.getSecrets("testSecrets")
+        val testProp2: String by yamlSecretsResolver.getSecretsData("testSecrets").properties
         assertEquals(3, testProp2)
     }
 
@@ -126,6 +126,18 @@ internal class YamlSecretsResolverTest {
     }
 
     @Test
+    fun `test getting secrets data`() {
+        // given
+        val secretName = "testSecrets2"
+        val expectedYamlSecretsData = YamlSecretsData(secretName,
+                getFileByResource("secrets").resolve("$secretName.sec.yml"),
+                getFileByResource("secrets").resolve(".$secretName.sec.yml"),
+                mapOf("testProp1" to "test2"))
+        // then
+        assertEquals(expectedYamlSecretsData, yamlSecretsResolver.getSecretsData("testSecrets2"))
+    }
+
+    @Test
     fun `test resolving empty secret file`() {
         // then
         assertThrows<IllegalStateException> { initSecretsResolver("emptySecrets") }
@@ -133,10 +145,11 @@ internal class YamlSecretsResolverTest {
 
     private fun initSecretsResolver(resourceName: String): YamlSecretsResolver {
         val yamlSecretsResolver = YamlSecretsResolver()
-        getSecretTemplatesInDir(File(javaClass.classLoader.getResource(resourceName)!!.path)).forEach {
-            loadProperties(yamlSecretsResolver, it)
-        }
+        val secretsDir = getFileByResource(resourceName)
+        loadSecretsByDirs(yamlSecretsResolver, sequenceOf(secretsDir))
         return yamlSecretsResolver
     }
+
+    private fun getFileByResource(resourceName: String): File = File(javaClass.classLoader.getResource(resourceName)!!.path)
 
 }
