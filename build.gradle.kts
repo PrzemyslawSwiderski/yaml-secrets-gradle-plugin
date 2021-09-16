@@ -1,27 +1,23 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     `java-gradle-plugin`
     `maven-publish`
-    kotlin("jvm") version "1.3.72"
+    kotlin("jvm") version "1.5.21"
     id("com.gradle.plugin-publish") version "0.11.0"
     id("net.researchgate.release") version "2.8.1"
 }
 
 repositories {
     mavenLocal()
-    jcenter()
-    maven {
-        setUrl("https://plugins.gradle.org/m2/")
-    }
+    gradlePluginPortal()
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.0")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.0")
+    implementation(kotlin("stdlib-jdk8", "1.5.21"))
+    implementation(kotlin("reflect", "1.5.21"))
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.5")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.5")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.6.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.0")
 }
 
 tasks {
@@ -31,8 +27,10 @@ tasks {
     "afterReleaseBuild"{
         dependsOn("publish", "publishPlugins")
     }
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
     }
 }
 gradlePlugin {

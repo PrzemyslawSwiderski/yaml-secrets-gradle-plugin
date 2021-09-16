@@ -113,7 +113,7 @@ internal class YamlSecretsResolverTest {
     @Test
     fun `test accessing by delegate 3`() {
         // then
-        val testProp2: String by yamlSecretsResolver.getSecretsData("testSecrets").properties
+        val testProp2 by yamlSecretsResolver.getSecretsData("testSecrets").properties
         assertEquals(3, testProp2)
     }
 

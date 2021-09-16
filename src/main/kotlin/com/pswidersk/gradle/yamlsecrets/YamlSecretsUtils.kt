@@ -63,7 +63,7 @@ internal fun loadProperties(secretsResolver: YamlSecretsResolver, templateFile: 
     secretsResolver.addSecrets(secretName, YamlSecretsData(secretName, templateFile, targetFile, properties))
 }
 
-internal fun parseYamlProperties(targetFile: File): Map<String, *> = try {
+internal fun parseYamlProperties(targetFile: File): Map<String, Any> = try {
     val mapper = YAMLMapper()
     mapper.readValue(targetFile)
 } catch (exception: Exception) {
