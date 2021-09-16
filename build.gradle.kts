@@ -38,7 +38,8 @@ gradlePlugin {
         create("yaml-secrets-gradle-plugin") {
             id = "com.pswidersk.yaml-secrets-plugin"
             implementationClass = "com.pswidersk.gradle.yamlsecrets.YamlSecretsPlugin"
-            displayName = "Gradle plugin to load secret properties from Yaml files. https://github.com/PrzemyslawSwiderski/yaml-secrets-gradle-plugin"
+            displayName = "Gradle plugin to load secret properties from Yaml files. " +
+                    "https://github.com/PrzemyslawSwiderski/yaml-secrets-gradle-plugin"
         }
     }
 }
