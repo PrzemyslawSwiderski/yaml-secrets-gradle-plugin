@@ -1,8 +1,10 @@
 package com.pswidersk.gradle.yamlsecrets
 
+import assertk.all
+import assertk.assertThat
+import assertk.assertions.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.io.File
 
 internal class YamlSecretsResolverTest {
@@ -48,52 +50,86 @@ internal class YamlSecretsResolverTest {
         // then
         assertEquals("testPropInList", yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[2]"))
         assertEquals("testKey", yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0].key"))
-        assertEquals("testValue2InNestedList", yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0].alsoNestedList.[1]"))
+        assertEquals(
+            "testValue2InNestedList",
+            yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0].alsoNestedList.[1]")
+        )
     }
 
     @Test
     fun `test if exception is thrown for illegalIndex 1`() {
         // then
-        assertThrows<IllegalStateException> { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[1].key") }
-        assertThrows<IndexOutOfBoundsException> { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[4]") }
+        assertThat { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[1].key") }
+            .isFailure()
+            .all {
+                isInstanceOf(IllegalStateException::class)
+                hasMessage("Key: key does not exists in secrets: testSecrets.")
+            }
+        assertThat { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[4]") }
+            .isFailure()
+            .all {
+                isInstanceOf(IndexOutOfBoundsException::class)
+                hasMessage("Index: 4, Size: 3")
+            }
     }
 
     @Test
     fun `test if exception is thrown for illegalIndex 2`() {
         // then
-        assertThrows<IllegalStateException> { yamlSecretsResolver.getValue("testSecrets", "testProp3.nestedList.[1].key") }
-        assertThrows<IndexOutOfBoundsException> { yamlSecretsResolver.getValue("testSecrets", "testProp3.nestedList.[4]") }
+        assertThat { yamlSecretsResolver.getValue("testSecrets", "testProp3.nestedList.[1].key") }
+            .isFailure()
+            .all {
+                isInstanceOf(IllegalStateException::class)
+                hasMessage("Key: key does not exists in secrets: testSecrets.")
+            }
+        assertThat { yamlSecretsResolver.getValue("testSecrets", "testProp3.nestedList.[4]") }
+            .isFailure()
+            .all {
+                isInstanceOf(IndexOutOfBoundsException::class)
+                hasMessage("Index: 4, Size: 3")
+            }
     }
 
     @Test
     fun `test if exception is thrown for non-existing secret file`() {
         // then
-        assertThrows<NoSuchElementException> { yamlSecretsResolver.getValue("testNonExistingSecrets.nonExisting") }
+        assertThat { yamlSecretsResolver.getValue("testNonExistingSecrets.nonExisting") }
+            .isFailure()
+            .all {
+                isInstanceOf(NoSuchElementException::class)
+                hasMessage("Key testNonExistingSecrets is missing in the map.")
+            }
     }
 
     @Test
     fun `test if exception is thrown for non-existing key`() {
         // then
-        val exception = assertThrows<IllegalStateException> { yamlSecretsResolver.getValue("testSecrets.nonExisting") }
-        assertEquals("Key: nonExisting does not exists in secrets: testSecrets.", exception.message)
+        assertThat { yamlSecretsResolver.getValue("testSecrets.nonExisting") }
+            .isFailure()
+            .all {
+                isInstanceOf(IllegalStateException::class)
+                hasMessage("Key: nonExisting does not exists in secrets: testSecrets.")
+            }
     }
 
     @Test
     fun `test if expected map is returned`() {
-        // given
-        val expectedMap = mapOf("key" to "testKey",
-                "value" to "testValue",
-                "alsoNestedList" to listOf("testValueInNestedList", "testValue2InNestedList"))
         // then
-        assertEquals(expectedMap, yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0]"))
+        assertThat(yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0]"))
+            .isEqualTo(
+                mapOf(
+                    "key" to "testKey",
+                    "value" to "testValue",
+                    "alsoNestedList" to listOf("testValueInNestedList", "testValue2InNestedList")
+                )
+            )
     }
 
     @Test
     fun `test if expected list is returned`() {
-        // given
-        val expectedList = listOf("testValueInNestedList", "testValue2InNestedList")
         // then
-        assertEquals(expectedList, yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0].alsoNestedList"))
+        assertThat(yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0].alsoNestedList"))
+            .isEqualTo(listOf("testValueInNestedList", "testValue2InNestedList"))
     }
 
     @Test
@@ -129,10 +165,12 @@ internal class YamlSecretsResolverTest {
     fun `test getting secrets data`() {
         // given
         val secretName = "testSecrets2"
-        val expectedYamlSecretsData = YamlSecretsData(secretName,
-                getFileByResource("secrets").resolve("$secretName.sec.yml"),
-                getFileByResource("secrets").resolve(".$secretName.sec.yml"),
-                mapOf("testProp1" to "test2"))
+        val expectedYamlSecretsData = YamlSecretsData(
+            secretName,
+            getFileByResource("secrets").resolve("$secretName.sec.yml"),
+            getFileByResource("secrets").resolve(".$secretName.sec.yml"),
+            mapOf("testProp1" to "test2")
+        )
         // then
         assertEquals(expectedYamlSecretsData, yamlSecretsResolver.getSecretsData("testSecrets2"))
     }
@@ -140,22 +178,33 @@ internal class YamlSecretsResolverTest {
     @Test
     fun `test getting missing secrets data`() {
         // then
-        assertThrows<IllegalStateException> { yamlSecretsResolver.getSecretsData("nonExistingSecrets") }
+        assertThat { yamlSecretsResolver.getSecretsData("nonExistingSecrets") }
+            .isFailure()
+            .all {
+                isInstanceOf(IllegalStateException::class)
+                hasMessage("Secrets with name: \"nonExistingSecrets\" could not be found.")
+            }
     }
 
     @Test
     fun `test resolving empty secret file`() {
         // then
-        assertThrows<IllegalStateException> { initSecretsResolver("emptySecrets") }
+        assertThat { initSecretsResolver("emptySecrets") }
+            .isFailure()
+            .all {
+                isInstanceOf(IllegalStateException::class)
+                messageContains("Exception occurred during parsing YAML file (file can not be empty)")
+            }
     }
 
-    private fun initSecretsResolver(resourceName: String): YamlSecretsResolver {
+    private fun initSecretsResolver(resourceDirectoryName: String): YamlSecretsResolver {
         val yamlSecretsResolver = YamlSecretsResolver()
-        val secretsDir = getFileByResource(resourceName)
+        val secretsDir = getFileByResource(resourceDirectoryName)
         loadSecretsByDirs(yamlSecretsResolver, sequenceOf(secretsDir))
         return yamlSecretsResolver
     }
 
-    private fun getFileByResource(resourceName: String): File = File(javaClass.classLoader.getResource(resourceName)!!.path)
+    private fun getFileByResource(resourceName: String): File =
+        File(javaClass.classLoader.getResource(resourceName)!!.path)
 
 }

@@ -1,7 +1,7 @@
 import com.pswidersk.gradle.yamlsecrets.YamlSecretsData
 
 plugins {
-    id("com.pswidersk.yaml-secrets-plugin") version "1.0.8"
+    id("com.pswidersk.yaml-secrets-plugin")
 }
 val testProp = secrets.get<Int>("test.testProp2")
 check(testProp == 32)

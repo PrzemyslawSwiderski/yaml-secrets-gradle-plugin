@@ -84,8 +84,10 @@ open class YamlSecretsResolver {
         return try {
             listIndex.trimStart(ARRAY_START).trimEnd(ARRAY_END).toInt()
         } catch (t: Throwable) {
-            throw IllegalStateException("Illegal array index: $listIndex, should match pattern " +
-                    "'arrayProperty$PROPS_SEP${ARRAY_START}i$ARRAY_END', where i is an index value.")
+            throw IllegalStateException(
+                "Illegal array index: $listIndex, should match pattern " +
+                        "'arrayProperty$PROPS_SEP${ARRAY_START}i$ARRAY_END', where i is an index value."
+            )
         }
     }
 

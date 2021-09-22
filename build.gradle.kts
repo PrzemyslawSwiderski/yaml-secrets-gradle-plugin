@@ -1,9 +1,12 @@
+import org.jetbrains.changelog.date
+
 plugins {
     `java-gradle-plugin`
     `maven-publish`
     kotlin("jvm") version "1.5.21"
     id("com.gradle.plugin-publish") version "0.11.0"
     id("net.researchgate.release") version "2.8.1"
+    id("org.jetbrains.changelog") version "1.3.0"
 }
 
 repositories {
@@ -12,12 +15,13 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8", "1.5.21"))
-    implementation(kotlin("reflect", "1.5.21"))
+    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("reflect"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.5")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.5")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.0")
+    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
 }
 
 tasks {
@@ -25,7 +29,7 @@ tasks {
         useJUnitPlatform()
     }
     "afterReleaseBuild"{
-        dependsOn("publish", "publishPlugins")
+        dependsOn("publish", "publishPlugins", "patchChangelog")
     }
     compileKotlin {
         kotlinOptions {
@@ -55,4 +59,9 @@ publishing {
     repositories {
         mavenLocal()
     }
+}
+
+// Configuring changelog Gradle plugin https://github.com/JetBrains/gradle-changelog-plugin
+changelog {
+    header.set(provider { "[${version.get()}] - ${date()}" })
 }

@@ -1,5 +1,5 @@
 plugins {
-    id("com.pswidersk.yaml-secrets-plugin") version "1.0.8"
+    id("com.pswidersk.yaml-secrets-plugin")
 }
 val testProp = secrets.get<String>("test.testProp1")
 check(testProp == "test")

@@ -15,7 +15,7 @@ import java.io.File
  * @return the property
  */
 internal inline fun <reified T : Any> ObjectFactory.property(): Property<T> =
-        property(T::class.javaObjectType)
+    property(T::class.javaObjectType)
 
 /**
  * Gets the [YamlSecretsResolver] that is installed on the project.
@@ -52,9 +52,9 @@ internal fun loadSecretsByDirs(secretsResolver: YamlSecretsResolver, directories
  * Method returns all secret files by the given input dir.
  */
 internal fun getSecretTemplatesInDir(inputDir: File) = inputDir.walk()
-        .maxDepth(1)
-        .filter { !it.nameWithoutExtension.startsWith(HIDDEN_PREFIX) }
-        .filter { file -> SECRET_EXTENSIONS.any { file.name.endsWith(it) } }
+    .maxDepth(1)
+    .filter { !it.nameWithoutExtension.startsWith(HIDDEN_PREFIX) }
+    .filter { file -> SECRET_EXTENSIONS.any { file.name.endsWith(it) } }
 
 internal fun loadProperties(secretsResolver: YamlSecretsResolver, templateFile: File, targetFile: File) {
     val properties = parseYamlProperties(targetFile)
@@ -67,5 +67,8 @@ internal fun parseYamlProperties(targetFile: File): Map<String, Any> = try {
     val mapper = YAMLMapper()
     mapper.readValue(targetFile)
 } catch (exception: Exception) {
-    throw IllegalStateException("Exception occurred during parsing YAML file (file can not be empty): $targetFile", exception)
+    throw IllegalStateException(
+        "Exception occurred during parsing YAML file (file can not be empty): $targetFile",
+        exception
+    )
 }
