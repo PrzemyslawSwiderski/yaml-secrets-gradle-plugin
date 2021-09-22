@@ -5,6 +5,7 @@ import assertk.assertThat
 import assertk.assertions.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junitpioneer.jupiter.SetEnvironmentVariable
 import java.io.File
 
 internal class YamlSecretsResolverTest {
@@ -195,6 +196,43 @@ internal class YamlSecretsResolverTest {
                 isInstanceOf(IllegalStateException::class)
                 messageContains("Exception occurred during parsing YAML file (file can not be empty)")
             }
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "TESTSECRETS_ENV_TESTPROP", value = "test Property Value From Environment")
+    fun `test getting secret by env if not specified in file`() {
+        // then
+        assertEquals("test Property Value From Environment", yamlSecretsResolver.getValue("testSecrets.env.testProp"))
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "CUSTOM_ENV_VAR_NAME", value = "test Property Value From Environment")
+    fun `test getting secret by env with custom env variable name`() {
+        // then
+        assertEquals(
+            "test Property Value From Environment",
+            yamlSecretsResolver.getValue("testSecrets", "env.testProp", "CUSTOM_ENV_VAR_NAME")
+        )
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "TESTSECRETS_ENV_TESTPROP", value = "test Property Value From Environment")
+    fun `test getting secret by env if not specified in file (reified)`() {
+        // then
+        assertEquals(
+            "test Property Value From Environment",
+            yamlSecretsResolver.get<String>("testSecrets.env.testProp")
+        )
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "CUSTOM_ENV_VAR_NAME", value = "test Property Value From Environment")
+    fun `test getting secret by env with custom env variable name  (reified)`() {
+        // then
+        assertEquals(
+            "test Property Value From Environment",
+            yamlSecretsResolver.get<String>("testSecrets", "env.testProp", "CUSTOM_ENV_VAR_NAME")
+        )
     }
 
     private fun initSecretsResolver(resourceDirectoryName: String): YamlSecretsResolver {

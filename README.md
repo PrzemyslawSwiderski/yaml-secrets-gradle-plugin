@@ -1,13 +1,18 @@
 # Gradle Yaml Secrets Plugin
-This plugin loads properties from Yaml secret files.
-Properties can later be used in build scripts.
+
+This plugin loads properties from Yaml secret files. Properties can later be used in build scripts.
 
 ## Requirements
+
 * JRE 8 or higher
 
 ## How to use
-1. Apply a plugin to a project as described on [gradle portal](https://plugins.gradle.org/plugin/com.pswidersk.yaml-secrets-plugin).
-2. Add sample secrets template file in project directory. File must have `.sec.yml` or `.sec.yaml` extension, for example `testSecrets.sec.yml`:
+
+1. Apply a plugin to a project as described
+   on [gradle portal](https://plugins.gradle.org/plugin/com.pswidersk.yaml-secrets-plugin).
+2. Add sample secrets template file in project directory. File must have `.sec.yml` or `.sec.yaml` extension, for
+   example `testSecrets.sec.yml`:
+
 ```yaml
 # obligatory value, must be fill in `.testSecrets.sec.yml` file
 secretProp: <TO_BE_FILLED>
@@ -16,6 +21,7 @@ testProp2: 7
 envVars: # fill envVars
 args: # fill args list
 ```
+
 3. Refresh project to create `.testSecrets.sec.yml` file.
 4. Fill necessary properties in `.testSecrets.sec.yml` file.
     ```yaml
@@ -66,6 +72,34 @@ args: # fill args list
 
 Check out `examples` directory to find sample projects.
 
+## Environment variables support
+
+This plugin supports getting a property with environment variables. It can be helpful In case of continuous integration
+builds where secrets files are unable to be filled.
+
+By default, it checks if there is an environment variable present by converting full property name to `SNAKE_CASE`
+environment variable name e.g.
+
+When getting a secret property by the following line:
+
+```kotlin
+val secretProperty = secrets.get<String>("testSecrets.secretProp")
+```
+
+Even though `testSecrets` secrets file can not be present, plugin firstly checks if there is an `TESTSECRETS_SECRETPROP`
+environment variable present, if it is, then value from env is assigned to a `secretProperty`.
+
+It is also possible to specify custom environment variable name:
+
+```kotlin
+val secretProperty = secrets.get<String>("testSecrets", "secretProp", "CUSTOM_ENV_VAR_NAME")
+```
+
+In this case we are checking presence of `CUSTOM_ENV_VAR_NAME` environment variable name instead. If this variable value
+is not null, then it is assigned to `secretProperty`.
+
 ## Notes
+
 * plugin automatically adds secret files pattern to `.gitignore` if this file exists in root dir.
-* secret files with the same name can be overridden in child projects (overriding single Yaml properties is not supported) 
+* secret files with the same name can be overridden in child projects (overriding single Yaml properties is not
+  supported) 

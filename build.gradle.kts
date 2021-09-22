@@ -19,7 +19,9 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.5")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.5")
-
+    implementation("org.apache.commons:commons-lang3:3.12.0")
+    
+    testImplementation("org.junit-pioneer:junit-pioneer:1.4.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.0")
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
 }

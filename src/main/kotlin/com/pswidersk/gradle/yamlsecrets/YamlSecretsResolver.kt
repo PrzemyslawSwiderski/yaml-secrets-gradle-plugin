@@ -1,25 +1,48 @@
 package com.pswidersk.gradle.yamlsecrets
 
+import org.apache.commons.lang3.SystemUtils
+
 open class YamlSecretsResolver {
     private val secretsDataByName: MutableMap<String, YamlSecretsData> = mutableMapOf()
 
-    inline fun <reified T> get(fullKey: String): T {
-        val secretValue = getValue(fullKey)
-        check(secretValue is T) { "Illegal generic type: ${T::class.java.simpleName}, secret value is type of: ${secretValue.javaClass.simpleName} for key: $fullKey" }
-        return getValue(fullKey) as T
+    inline fun <reified T> get(
+        fullKey: String
+    ): T {
+        return get(
+            fullKey.substringBefore(PROPS_SEP),
+            fullKey.substringAfter(PROPS_SEP, ""),
+            fromDotCaseToSnake(fullKey)
+        )
     }
 
-    inline fun <reified T> get(secretsName: String, yamlPropertyKey: String): T {
-        val secretValue = getValue(secretsName, yamlPropertyKey)
+    inline fun <reified T> get(
+        secretsName: String,
+        yamlPropertyKey: String,
+        envVarName: String = fromDotCaseToSnake(secretsName + PROPS_SEP + yamlPropertyKey)
+    ): T {
+        val secretValue = getValue(secretsName, yamlPropertyKey, envVarName)
         check(secretValue is T) { "Illegal generic type: ${T::class.java.simpleName}, secret value is type of: ${secretValue.javaClass.simpleName} for secret: $secretsName and key: $yamlPropertyKey" }
-        return getValue(secretsName, yamlPropertyKey) as T
+        return secretValue
     }
 
     fun getValue(fullKey: String): Any {
-        return getValue(fullKey.substringBefore(PROPS_SEP), fullKey.substringAfter(PROPS_SEP, ""))
+        return getValue(
+            fullKey.substringBefore(PROPS_SEP),
+            fullKey.substringAfter(PROPS_SEP, ""),
+            fromDotCaseToSnake(fullKey)
+        )
     }
 
-    fun getValue(secretsName: String, yamlPropertyKey: String): Any {
+    fun getValue(
+        secretsName: String,
+        yamlPropertyKey: String,
+        envVarName: String = fromDotCaseToSnake(secretsName + PROPS_SEP + yamlPropertyKey)
+    ): Any {
+        val envVarValue = SystemUtils.getEnvironmentVariable(envVarName, "")
+        if (envVarValue.isNotEmpty()) {
+            return envVarValue;
+        }
+
         val secrets = secretsDataByName.getValue(secretsName)
         if (yamlPropertyKey == "")
             return secrets.properties
@@ -33,6 +56,10 @@ open class YamlSecretsResolver {
 
     fun getNames(): Set<String> {
         return secretsDataByName.keys
+    }
+
+    fun addSecrets(secretsFileName: String, yamlSecretsData: YamlSecretsData) {
+        this.secretsDataByName[secretsFileName] = yamlSecretsData
     }
 
     private fun getNestedValue(yamlPropertyKey: String, secretsName: String, secretsMap: Map<*, *>): Any {
@@ -91,8 +118,5 @@ open class YamlSecretsResolver {
         }
     }
 
-    fun addSecrets(secretsFileName: String, yamlSecretsData: YamlSecretsData) {
-        this.secretsDataByName[secretsFileName] = yamlSecretsData
-    }
 
 }

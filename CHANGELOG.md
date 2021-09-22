@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - [AssertK](https://github.com/willowtreeapps/assertk) in tests.
 - Changelog [plugin](https://github.com/JetBrains/gradle-changelog-plugin).
+- Support for environment variables.
 
 ### Changed
 

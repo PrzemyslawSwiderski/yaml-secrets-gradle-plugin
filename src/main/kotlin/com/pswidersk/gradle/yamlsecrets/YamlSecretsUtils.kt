@@ -72,3 +72,11 @@ internal fun parseYamlProperties(targetFile: File): Map<String, Any> = try {
         exception
     )
 }
+
+/**
+ *  Converts properties strings to a System variables convention strings,
+ *  e.g. parent.someProperty.child -> PARENT_SOMEPROPERTY_CHILD
+ */
+fun fromDotCaseToSnake(inputStr: String): String {
+    return inputStr.uppercase().replace(".", "_")
+}
