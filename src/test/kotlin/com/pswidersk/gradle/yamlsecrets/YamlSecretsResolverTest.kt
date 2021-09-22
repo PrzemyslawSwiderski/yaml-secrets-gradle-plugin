@@ -70,7 +70,6 @@ internal class YamlSecretsResolverTest {
             .isFailure()
             .all {
                 isInstanceOf(IndexOutOfBoundsException::class)
-                hasMessage("Index: 4, Size: 3")
             }
     }
 
@@ -87,7 +86,6 @@ internal class YamlSecretsResolverTest {
             .isFailure()
             .all {
                 isInstanceOf(IndexOutOfBoundsException::class)
-                hasMessage("Index: 4, Size: 3")
             }
     }
 
