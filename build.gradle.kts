@@ -6,7 +6,7 @@ plugins {
     kotlin("jvm") version "1.5.21"
     id("com.gradle.plugin-publish") version "0.11.0"
     id("net.researchgate.release") version "2.8.1"
-    id("org.jetbrains.changelog") version "1.3.0"
+    id("org.jetbrains.changelog") version "1.3.1"
 }
 
 repositories {
