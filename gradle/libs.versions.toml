@@ -1,0 +1,40 @@
+[versions]
+# Libraries
+commonsLang3 = "3.19.0"
+jackson = "3.0.2"
+junit = "6.0.1"
+junitPioneer = "2.3.0"
+assertj = "3.27.6"
+# Plugins
+kotlin = "2.2.21"
+kover = "0.9.3"
+pluginPublish = "2.0.0"
+
+[libraries]
+# Compile
+commonsLang3 = { group = "org.apache.commons", name = "commons-lang3", version.ref = "commonsLang3" }
+jacksonKotlin = { group = "tools.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
+jacksonDataFormat = { group = "tools.jackson.dataformat", name = "jackson-dataformat-yaml", version.ref = "jackson" }
+# Test
+jupiterPlatform = { group = "org.junit.platform", name = "junit-platform-launcher" }
+jupiterMain = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
+junitPioneer = { group = "org.junit-pioneer", name = "junit-pioneer", version.ref = "junitPioneer" }
+assertj = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
+
+[plugins]
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "pluginPublish" }
+
+[bundles]
+test = [
+    "jupiterMain",
+    "jupiterPlatform",
+    "junitPioneer",
+    "assertj",
+]
+compile = [
+    "commonsLang3",
+    "jacksonKotlin",
+    "jacksonDataFormat",
+]
