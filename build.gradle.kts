@@ -23,7 +23,7 @@ dependencies {
     
     testImplementation("org.junit-pioneer:junit-pioneer:1.4.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.0")
-    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
+    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.28.1")
 }
 
 tasks {
