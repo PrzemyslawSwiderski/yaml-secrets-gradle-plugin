@@ -2,12 +2,12 @@ import com.pswidersk.gradle.python.VenvTask
 
 plugins {
     id("com.pswidersk.yaml-secrets-plugin")
-    id("com.pswidersk.python-plugin") version "1.2.3"
+    id("com.pswidersk.python-plugin") version "3.0.0"
 }
 
 pythonPlugin {
     pythonVersion.set("3.9.2")
-    minicondaVersion.set("py38_4.8.3")
+    condaVersion.set("25.9.1-0")
 }
 
 tasks {

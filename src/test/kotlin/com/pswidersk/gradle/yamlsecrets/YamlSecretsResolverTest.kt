@@ -1,114 +1,104 @@
 package com.pswidersk.gradle.yamlsecrets
 
-import assertk.all
-import assertk.assertThat
-import assertk.assertions.*
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junitpioneer.jupiter.SetEnvironmentVariable
 import java.io.File
 
 internal class YamlSecretsResolverTest {
 
-    //given
+    // given
     private val yamlSecretsResolver = initSecretsResolver("secrets")
 
     @Test
     fun `test if secrets were added to resolver`() {
         // then
-        assertEquals("test", yamlSecretsResolver.getValue("testSecrets.testProp1"))
+        assertThat(yamlSecretsResolver.getValue("testSecrets.testProp1"))
+            .isEqualTo("test")
     }
 
     @Test
     fun `test if nested string props are resolved properly 1`() {
         // then
-        assertEquals("2", yamlSecretsResolver.getValue("testSecrets.testProp3.nested1").toString())
-        assertEquals("test", yamlSecretsResolver.getValue("testSecrets.testProp3.nested2"))
+        assertThat(yamlSecretsResolver.getValue("testSecrets.testProp3.nested1").toString())
+            .isEqualTo("2")
+        assertThat(yamlSecretsResolver.getValue("testSecrets.testProp3.nested2"))
+            .isEqualTo("test")
     }
 
     @Test
     fun `test if nested string props are resolved properly 2`() {
         // then
-        assertEquals(2, yamlSecretsResolver.get("testSecrets.testProp3.nested1"))
-        assertEquals("test", yamlSecretsResolver.get<String>("testSecrets.testProp3.nested2"))
+        assertThat(yamlSecretsResolver.get<Any>("testSecrets.testProp3.nested1"))
+            .isEqualTo(2)
+        assertThat(yamlSecretsResolver.get<String>("testSecrets.testProp3.nested2"))
+            .isEqualTo("test")
     }
 
     @Test
     fun `test if nested string props are resolved properly 3`() {
         // then
-        assertEquals(2, yamlSecretsResolver.get("testSecrets", "testProp3.nested1"))
-        assertEquals("test", yamlSecretsResolver.get<String>("testSecrets", "testProp3.nested2"))
+        assertThat(yamlSecretsResolver.get<Any>("testSecrets", "testProp3.nested1"))
+            .isEqualTo(2)
+        assertThat(yamlSecretsResolver.get<String>("testSecrets", "testProp3.nested2"))
+            .isEqualTo("test")
     }
 
     @Test
-    fun `test if empty prop is resolved properly `() {
+    fun `test if empty prop is resolved properly`() {
         // then
-        assertEquals("", yamlSecretsResolver.getValue("testSecrets.testEmptyProp"))
+        assertThat(yamlSecretsResolver.getValue("testSecrets.testEmptyProp"))
+            .isEqualTo("")
     }
 
     @Test
     fun `test if nested string prop inside list is resolved properly`() {
         // then
-        assertEquals("testPropInList", yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[2]"))
-        assertEquals("testKey", yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0].key"))
-        assertEquals(
-            "testValue2InNestedList",
-            yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0].alsoNestedList.[1]")
-        )
+        assertThat(yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[2]"))
+            .isEqualTo("testPropInList")
+        assertThat(yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0].key"))
+            .isEqualTo("testKey")
+        assertThat(yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[0].alsoNestedList.[1]"))
+            .isEqualTo("testValue2InNestedList")
     }
 
     @Test
     fun `test if exception is thrown for illegalIndex 1`() {
         // then
-        assertThat { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[1].key") }
-            .isFailure()
-            .all {
-                isInstanceOf(IllegalStateException::class)
-                hasMessage("Key: key does not exists in secrets: testSecrets.")
-            }
-        assertThat { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[4]") }
-            .isFailure()
-            .all {
-                isInstanceOf(IndexOutOfBoundsException::class)
-            }
+        assertThatThrownBy { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[1].key") }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("Key: key does not exists in secrets: testSecrets.")
+
+        assertThatThrownBy { yamlSecretsResolver.getValue("testSecrets.testProp3.nestedList.[4]") }
+            .isInstanceOf(IndexOutOfBoundsException::class.java)
     }
 
     @Test
     fun `test if exception is thrown for illegalIndex 2`() {
         // then
-        assertThat { yamlSecretsResolver.getValue("testSecrets", "testProp3.nestedList.[1].key") }
-            .isFailure()
-            .all {
-                isInstanceOf(IllegalStateException::class)
-                hasMessage("Key: key does not exists in secrets: testSecrets.")
-            }
-        assertThat { yamlSecretsResolver.getValue("testSecrets", "testProp3.nestedList.[4]") }
-            .isFailure()
-            .all {
-                isInstanceOf(IndexOutOfBoundsException::class)
-            }
+        assertThatThrownBy { yamlSecretsResolver.getValue("testSecrets", "testProp3.nestedList.[1].key") }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("Key: key does not exists in secrets: testSecrets.")
+
+        assertThatThrownBy { yamlSecretsResolver.getValue("testSecrets", "testProp3.nestedList.[4]") }
+            .isInstanceOf(IndexOutOfBoundsException::class.java)
     }
 
     @Test
     fun `test if exception is thrown for non-existing secret file`() {
         // then
-        assertThat { yamlSecretsResolver.getValue("testNonExistingSecrets.nonExisting") }
-            .isFailure()
-            .all {
-                isInstanceOf(NoSuchElementException::class)
-                hasMessage("Key testNonExistingSecrets is missing in the map.")
-            }
+        assertThatThrownBy { yamlSecretsResolver.getValue("testNonExistingSecrets.nonExisting") }
+            .isInstanceOf(NoSuchElementException::class.java)
+            .hasMessage("Key testNonExistingSecrets is missing in the map.")
     }
 
     @Test
     fun `test if exception is thrown for non-existing key`() {
         // then
-        assertThat { yamlSecretsResolver.getValue("testSecrets.nonExisting") }
-            .isFailure()
-            .all {
-                isInstanceOf(IllegalStateException::class)
-                hasMessage("Key: nonExisting does not exists in secrets: testSecrets.")
-            }
+        assertThatThrownBy { yamlSecretsResolver.getValue("testSecrets.nonExisting") }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("Key: nonExisting does not exists in secrets: testSecrets.")
     }
 
     @Test
@@ -135,21 +125,21 @@ internal class YamlSecretsResolverTest {
     fun `test accessing by delegate 1`() {
         // then
         val testProp2 by yamlSecretsResolver.get<Map<String, Any>>("testSecrets.")
-        assertEquals(3, testProp2)
+        assertThat(testProp2).isEqualTo(3)
     }
 
     @Test
     fun `test accessing by delegate 2`() {
         // then
         val testProp2 by yamlSecretsResolver.get<Map<String, Any>>("testSecrets")
-        assertEquals(3, testProp2)
+        assertThat(testProp2).isEqualTo(3)
     }
 
     @Test
     fun `test accessing by delegate 3`() {
         // then
         val testProp2 by yamlSecretsResolver.getSecretsData("testSecrets").properties
-        assertEquals(3, testProp2)
+        assertThat(testProp2).isEqualTo(3)
     }
 
     @Test
@@ -157,7 +147,7 @@ internal class YamlSecretsResolverTest {
         // given
         val expectedList = setOf("testSecrets", "testSecrets2")
         // then
-        assertEquals(expectedList, yamlSecretsResolver.getNames())
+        assertThat(yamlSecretsResolver.getNames()).isEqualTo(expectedList)
     }
 
     @Test
@@ -171,66 +161,56 @@ internal class YamlSecretsResolverTest {
             mapOf("testProp1" to "test2")
         )
         // then
-        assertEquals(expectedYamlSecretsData, yamlSecretsResolver.getSecretsData("testSecrets2"))
+        assertThat(yamlSecretsResolver.getSecretsData("testSecrets2"))
+            .isEqualTo(expectedYamlSecretsData)
     }
 
     @Test
     fun `test getting missing secrets data`() {
         // then
-        assertThat { yamlSecretsResolver.getSecretsData("nonExistingSecrets") }
-            .isFailure()
-            .all {
-                isInstanceOf(IllegalStateException::class)
-                hasMessage("Secrets with name: \"nonExistingSecrets\" could not be found.")
-            }
+        assertThatThrownBy { yamlSecretsResolver.getSecretsData("nonExistingSecrets") }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("Secrets with name: \"nonExistingSecrets\" could not be found.")
     }
 
     @Test
     fun `test resolving empty secret file`() {
         // then
-        assertThat { initSecretsResolver("emptySecrets") }
-            .isFailure()
-            .all {
-                isInstanceOf(IllegalStateException::class)
-                messageContains("Exception occurred during parsing YAML file (file can not be empty)")
-            }
+        assertThatThrownBy { initSecretsResolver("emptySecrets") }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("Exception occurred during parsing YAML file (file can not be empty)")
     }
 
     @Test
     @SetEnvironmentVariable(key = "TESTSECRETS_ENV_TESTPROP", value = "test Property Value From Environment")
     fun `test getting secret by env if not specified in file`() {
         // then
-        assertEquals("test Property Value From Environment", yamlSecretsResolver.getValue("testSecrets.env.testProp"))
+        assertThat(yamlSecretsResolver.getValue("testSecrets.env.testProp"))
+            .isEqualTo("test Property Value From Environment")
     }
 
     @Test
     @SetEnvironmentVariable(key = "CUSTOM_ENV_VAR_NAME", value = "test Property Value From Environment")
     fun `test getting secret by env with custom env variable name`() {
         // then
-        assertEquals(
-            "test Property Value From Environment",
-            yamlSecretsResolver.getValue("testSecrets", "env.testProp", "CUSTOM_ENV_VAR_NAME")
-        )
+        assertThat(yamlSecretsResolver.getValue("testSecrets", "env.testProp", "CUSTOM_ENV_VAR_NAME"))
+            .isEqualTo("test Property Value From Environment")
     }
 
     @Test
     @SetEnvironmentVariable(key = "TESTSECRETS_ENV_TESTPROP", value = "test Property Value From Environment")
     fun `test getting secret by env if not specified in file (reified)`() {
         // then
-        assertEquals(
-            "test Property Value From Environment",
-            yamlSecretsResolver.get<String>("testSecrets.env.testProp")
-        )
+        assertThat(yamlSecretsResolver.get<String>("testSecrets.env.testProp"))
+            .isEqualTo("test Property Value From Environment")
     }
 
     @Test
     @SetEnvironmentVariable(key = "CUSTOM_ENV_VAR_NAME", value = "test Property Value From Environment")
     fun `test getting secret by env with custom env variable name  (reified)`() {
         // then
-        assertEquals(
-            "test Property Value From Environment",
-            yamlSecretsResolver.get<String>("testSecrets", "env.testProp", "CUSTOM_ENV_VAR_NAME")
-        )
+        assertThat(yamlSecretsResolver.get<String>("testSecrets", "env.testProp", "CUSTOM_ENV_VAR_NAME"))
+            .isEqualTo("test Property Value From Environment")
     }
 
     private fun initSecretsResolver(resourceDirectoryName: String): YamlSecretsResolver {

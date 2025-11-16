@@ -1,3 +1,6 @@
+[![🥁 Build](https://github.com/PrzemyslawSwiderski/yaml-secrets-gradle-plugin/actions/workflows/build.yml/badge.svg)](https://github.com/PrzemyslawSwiderski/yaml-secrets-gradle-plugin/actions/workflows/build.yml)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/PrzemyslawSwiderski/yaml-secrets-gradle-plugin?label=Plugin%20Version&sort=semver&style=plastic)](https://plugins.gradle.org/plugin/com.pswidersk.yaml-secrets-plugin)
+
 # Gradle Yaml Secrets Plugin
 
 This plugin loads properties from Yaml secret files. Properties can later be used in build scripts.
