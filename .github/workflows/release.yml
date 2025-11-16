@@ -1,0 +1,66 @@
+# Workflow triggered when new Release is created.
+
+name: ✨ Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Optional tag to use"
+        required: false
+        type: string
+
+  push:
+    tags: ["*.*"]
+
+  workflow_call:
+    inputs:
+      tag:
+        description: "Tag to use"
+        required: true
+        type: string
+
+env:
+  VERSION_TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  release:
+    name: Release Plugin
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Fetch Sources
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Determine Version
+        id: version
+        run: |
+          VERSION="${VERSION_TAG#[vV]}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Publish Plugin
+        run: ./gradlew publishPlugins
+        env:
+          PLUGIN_VERSION: ${{ steps.version.outputs.version }}
+          GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
+          GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
+
+  post-release-updates:
+    name: Post Release Updates
+    permissions:
+      contents: write
+      pull-requests: write
+    needs: [release]
+    uses: ./.github/workflows/post-release-updates.yml
+    with:
+      release-version: ${{ needs.release.outputs.version }}
