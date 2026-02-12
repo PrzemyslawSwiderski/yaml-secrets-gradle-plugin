@@ -7,7 +7,7 @@ junitPioneer = "2.3.0"
 assertj = "3.27.7"
 # Plugins
 kotlin = "2.3.10"
-kover = "0.9.6"
+kover = "0.9.7"
 pluginPublish = "2.0.0"
 
 [libraries]
