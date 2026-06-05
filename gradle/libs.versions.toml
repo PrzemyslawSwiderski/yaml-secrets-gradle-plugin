@@ -6,7 +6,7 @@ junit = "6.1.0"
 junitPioneer = "2.3.0"
 assertj = "3.27.7"
 # Plugins
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 kover = "0.9.8"
 pluginPublish = "2.1.1"
 
