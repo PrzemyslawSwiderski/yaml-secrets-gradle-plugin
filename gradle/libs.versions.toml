@@ -8,7 +8,7 @@ assertj = "3.27.7"
 # Plugins
 kotlin = "2.4.20"
 kover = "0.9.9"
-pluginPublish = "2.2.0"
+pluginPublish = "2.2.1"
 
 [libraries]
 # Compile
